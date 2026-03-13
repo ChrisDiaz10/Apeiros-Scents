@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apeiros Scents — The Scripture Collection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #080808;
+  --deep-navy: #0d0d1a;
+  --gold: #c9a84c;
+  --gold-light: #e8c96a;
+  --gold-dim: #8a6f2e;
+  --gold-faint: #3a2e10;
+  --parchment: #f5ead0;
+  --parchment-dark: #e8d5b0;
+  --parchment-mid: #ede0c0;
+  --ink: #1a1208;
+  --silver: #c0c0c0;
+  --amber: #b5651d;
+  --card-bg: #0f0e13;
+  --card-border: #2a2520;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--black);
+  color:var(--parchment);
+  font-family:'Cormorant Garamond',serif;
+  cursor:none;
+  overflow-x:hidden;
+  min-height:100vh;
+}
+/* CUSTOM CURSOR */
+#custom-cursor{
+  position:fixed;
+  top:0;left:0;
+  width:24px;height:24px;
+  pointer-events:none;
+  z-index:9999;
+  font-size:18px;
+  color:var(--gold);
+  transform:translate(-50%,-50%);
+  transition:transform 0.05s linear;
+  text-shadow:0 0 8px rgba(201,168,76,0.6);
+  user-select:none;
+}
+/* SCREENS */
+.screen{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.5s ease,transform 0.5s ease;
+  transform:translateY(20px);
+  overflow-y:auto;
+}
+.screen.active{
+  opacity:1;
+  pointer-events:all;
+  transform:translateY(0);
+  position:relative;
+}
+
+/* ==================== LANDING SCREEN ==================== */
+#screen-landing{
+  background:var(--black);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  overflow:hidden;
+}
+#particle-canvas{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  pointer-events:none;
+  z-index:1;
+}
+.landing-content{
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2rem;
+  padding:2rem;
+}
+.brand-header{
+  text-align:center;
+}
+.brand-name{
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(1.4rem,4vw,2.8rem);
+  color:var(--gold);
+  letter-spacing:0.3em;
+  text-transform:uppercase;
+  line-height:1.2;
+  text-shadow:0 0 30px rgba(201,168,76,0.4);
+  animation:fadeInUp 1s ease 0.3s both;
+}
+.brand-tagline{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:clamp(0.85rem,2vw,1.1rem);
+  color:rgba(245,234,208,0.6);
+  letter-spacing:0.25em;
+  margin-top:0.5rem;
+  animation:fadeInUp 1s ease 0.6s both;
+}
+/* BIBLE */
+.bible-scene{
+  perspective:1200px;
+  cursor:pointer;
+  animation:fadeInUp 1s ease 0.9s both;
+}
+.bible-inner{
+  position:relative;
+  width:200px;
+  height:280px;
+  transform-style:preserve-3d;
+  transition:transform 0.15s ease;
+}
+.bible-scene:hover .bible-inner{
+  transform:rotateY(-5deg) rotateX(3deg);
+}
+.bible-cover{
+  position:absolute;
+  width:200px;height:280px;
+  background:linear-gradient(135deg,#2a1a0a 0%,#1a0f06 30%,#2e1d0c 60%,#1a0f06 100%);
+  border-radius:4px 12px 12px 4px;
+  box-shadow:
+    -4px 0 0 #0a0704,
+    0 4px 20px rgba(0,0,0,0.8),
+    0 0 40px rgba(201,168,76,0.15),
+    inset 2px 0 8px rgba(0,0,0,0.5);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  padding:20px;
+  transform-origin:left center;
+  transition:transform 0.8s cubic-bezier(0.4,0,0.2,1);
+  backface-visibility:hidden;
+  animation:biblePulse 3s ease-in-out infinite;
+}
+.bible-cover::before{
+  content:'';
+  position:absolute;
+  top:12px;bottom:12px;left:12px;right:12px;
+  border:1px solid rgba(201,168,76,0.3);
+  border-radius:2px 8px 8px 2px;
+  pointer-events:none;
+}
+.bible-cover::after{
+  content:'';
+  position:absolute;
+  top:8px;bottom:8px;left:8px;right:8px;
+  border:1px solid rgba(201,168,76,0.15);
+  border-radius:2px 8px 8px 2px;
+  pointer-events:none;
+}
+.bible-cross{
+  font-size:2.5rem;
+  color:var(--gold);
+  text-shadow:0 0 20px rgba(201,168,76,0.8);
+  line-height:1;
+}
+.bible-title-text{
+  font-family:'Cinzel',serif;
+  font-size:0.6rem;
+  color:var(--gold);
+  letter-spacing:0.3em;
+  text-align:center;
+  text-transform:uppercase;
+  line-height:1.8;
+  opacity:0.9;
+}
+.bible-subtitle-text{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:0.55rem;
+  color:rgba(201,168,76,0.6);
+  letter-spacing:0.15em;
+  text-align:center;
+}
+.bible-open .bible-cover{
+  transform:rotateY(-165deg);
+}
+/* Pages visible behind cover */
+.bible-pages{
+  position:absolute;
+  width:190px;height:272px;
+  left:8px;top:4px;
+  background:linear-gradient(90deg,#f5ead0 0%,#ede0c0 40%,#e8d5b0 100%);
+  border-radius:2px 10px 10px 2px;
+  box-shadow:2px 0 4px rgba(0,0,0,0.3);
+}
+.bible-pages::before{
+  content:'';
+  position:absolute;
+  top:0;bottom:0;left:0;
+  width:6px;
+  background:linear-gradient(90deg,#c8b89a,#d4c4a8);
+  border-radius:2px 0 0 2px;
+}
+.open-prompt{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:0.85rem;
+  color:rgba(201,168,76,0.5);
+  letter-spacing:0.2em;
+  animation:fadeInUp 1s ease 1.4s both;
+  transition:color 0.3s;
+}
+.bible-scene:hover .open-prompt{color:rgba(201,168,76,0.8);}
+
+/* ==================== TOC SCREEN ==================== */
+#screen-toc{
+  background:var(--parchment);
+  color:var(--ink);
+  min-height:100vh;
+  padding:0 0 4rem;
+}
+.toc-header{
+  background:var(--ink);
+  padding:2.5rem 2rem 2rem;
+  text-align:center;
+  position:sticky;
+  top:0;
+  z-index:100;
+  box-shadow:0 2px 20px rgba(0,0,0,0.5);
+}
+.toc-brand{
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(1rem,3vw,1.8rem);
+  color:var(--gold);
+  letter-spacing:0.25em;
+  margin-bottom:0.4rem;
+}
+.toc-subtitle{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  color:rgba(201,168,76,0.6);
+  font-size:0.9rem;
+  letter-spacing:0.15em;
+}
+.toc-section-header{
+  font-family:'Cinzel',serif;
+  font-size:0.65rem;
+  letter-spacing:0.4em;
+  text-transform:uppercase;
+  color:rgba(26,18,8,0.4);
+  padding:1.5rem 2rem 0.5rem;
+  border-bottom:1px solid rgba(26,18,8,0.15);
+  margin:0 1rem;
+}
+.toc-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;
+  padding:0 1rem;
+}
+.book-row{
+  display:flex;
+  align-items:center;
+  gap:0.75rem;
+  padding:0.8rem 1rem;
+  border-bottom:1px solid rgba(26,18,8,0.08);
+  cursor:pointer;
+  transition:background 0.2s,padding-left 0.2s;
+  font-family:'Cinzel',serif;
+}
+.book-row:hover{
+  background:rgba(201,168,76,0.12);
+  padding-left:1.5rem;
+}
+.book-row:focus{
+  outline:2px solid var(--gold);
+  outline-offset:-2px;
+}
+.book-num{
+  font-size:0.65rem;
+  color:rgba(26,18,8,0.35);
+  min-width:1.8rem;
+  text-align:right;
+  font-family:'Cormorant Garamond',serif;
+}
+.book-name{
+  font-size:0.78rem;
+  color:var(--ink);
+  flex:1;
+  letter-spacing:0.05em;
+  transition:color 0.2s;
+}
+.book-row:hover .book-name{color:var(--amber);}
+.testament-badge{
+  font-size:0.55rem;
+  letter-spacing:0.1em;
+  color:rgba(26,18,8,0.35);
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+}
+.testament-badge.nt{color:var(--amber);opacity:0.7;}
+/* Stagger animation */
+.book-row{opacity:0;transform:translateY(8px);}
+.book-row.visible{
+  animation:fadeInUp 0.4s ease forwards;
+}
+
+/* ==================== BOOK SCREEN ==================== */
+#screen-book{
+  background:var(--deep-navy);
+  min-height:100vh;
+  color:var(--parchment);
+}
+.book-page{
+  max-width:1200px;
+  margin:0 auto;
+  padding:2rem 1.5rem 4rem;
+}
+.book-breadcrumb{
+  font-family:'Cinzel',serif;
+  font-size:0.65rem;
+  letter-spacing:0.25em;
+  color:rgba(201,168,76,0.4);
+  text-transform:uppercase;
+  margin-bottom:3rem;
+  display:flex;
+  align-items:center;
+  gap:0.75rem;
+}
+.breadcrumb-link{
+  cursor:pointer;
+  transition:color 0.2s;
+}
+.breadcrumb-link:hover{color:var(--gold);}
+.breadcrumb-sep{opacity:0.4;}
+.book-hero{
+  text-align:center;
+  margin-bottom:4rem;
+  padding:3rem 1rem;
+  border-bottom:1px solid rgba(201,168,76,0.15);
+  position:relative;
+}
+.book-hero::before{
+  content:'';
+  position:absolute;
+  bottom:0;left:50%;
+  transform:translateX(-50%);
+  width:60px;height:1px;
+  background:var(--gold);
+}
+.book-testament-label{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:0.8rem;
+  letter-spacing:0.3em;
+  color:rgba(201,168,76,0.5);
+  text-transform:uppercase;
+  margin-bottom:1rem;
+}
+.book-chapter-num{
+  font-family:'Cinzel',serif;
+  font-size:0.7rem;
+  letter-spacing:0.4em;
+  color:rgba(201,168,76,0.3);
+  margin-bottom:0.5rem;
+}
+.book-title{
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(2rem,6vw,4.5rem);
+  color:var(--gold);
+  letter-spacing:0.05em;
+  line-height:1.1;
+  margin-bottom:1rem;
+  text-shadow:0 0 40px rgba(201,168,76,0.2);
+}
+.book-subtitle-hero{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:clamp(1rem,2.5vw,1.3rem);
+  color:rgba(245,234,208,0.5);
+  max-width:500px;
+  margin:0 auto 1.5rem;
+  line-height:1.6;
+}
+.book-line-name{
+  font-family:'Cinzel',serif;
+  font-size:0.75rem;
+  letter-spacing:0.3em;
+  color:var(--gold-dim);
+  text-transform:uppercase;
+}
+/* FRAGRANCE CARDS */
+.fragrances-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:1.5rem;
+  margin-bottom:3rem;
+}
+.fragrance-card{
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:2px;
+  padding:2rem 1.5rem;
+  cursor:pointer;
+  transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease;
+  position:relative;
+  overflow:hidden;
+}
+.fragrance-card::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);
+  opacity:0;
+  transition:opacity 0.3s;
+}
+.fragrance-card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 20px 40px rgba(0,0,0,0.5),0 0 20px rgba(201,168,76,0.1);
+  border-color:rgba(201,168,76,0.3);
+}
+.fragrance-card:hover::before{opacity:1;}
+.card-numeral{
+  font-family:'Cinzel',serif;
+  font-size:0.6rem;
+  letter-spacing:0.4em;
+  color:rgba(201,168,76,0.3);
+  margin-bottom:0.75rem;
+}
+.card-name{
+  font-family:'Cinzel',serif;
+  font-size:1rem;
+  color:var(--parchment);
+  margin-bottom:0.75rem;
+  letter-spacing:0.05em;
+  line-height:1.3;
+}
+.card-desc{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:0.85rem;
+  color:rgba(245,234,208,0.6);
+  line-height:1.6;
+  margin-bottom:1.25rem;
+}
+.card-notes{
+  font-size:0.72rem;
+  color:rgba(245,234,208,0.4);
+  font-family:'Cormorant Garamond',serif;
+  line-height:1.8;
+}
+.note-label{
+  color:rgba(201,168,76,0.5);
+  font-family:'Cinzel',serif;
+  font-size:0.6rem;
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+}
+.card-btn{
+  display:inline-block;
+  margin-top:1.5rem;
+  padding:0.5rem 1.25rem;
+  border:1px solid rgba(201,168,76,0.3);
+  font-family:'Cinzel',serif;
+  font-size:0.6rem;
+  letter-spacing:0.3em;
+  color:var(--gold-dim);
+  text-transform:uppercase;
+  transition:background 0.2s,color 0.2s,border-color 0.2s;
+  cursor:pointer;
+}
+.card-btn:hover{
+  background:rgba(201,168,76,0.1);
+  color:var(--gold);
+  border-color:rgba(201,168,76,0.6);
+}
+/* BOOK NAVIGATION */
+.book-nav{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:2rem 0;
+  border-top:1px solid rgba(201,168,76,0.1);
+  margin-top:1rem;
+}
+.nav-btn{
+  display:flex;
+  align-items:center;
+  gap:0.75rem;
+  cursor:pointer;
+  font-family:'Cinzel',serif;
+  font-size:0.65rem;
+  letter-spacing:0.25em;
+  color:rgba(201,168,76,0.4);
+  text-transform:uppercase;
+  transition:color 0.2s;
+  padding:0.5rem;
+}
+.nav-btn:hover{color:var(--gold);}
+.nav-btn.disabled{opacity:0.2;pointer-events:none;}
+.nav-arrow{font-size:1.2rem;color:var(--gold-dim);}
+.nav-center{
+  text-align:center;
+  font-family:'Cormorant Garamond',serif;
+  font-size:0.8rem;
+  color:rgba(245,234,208,0.3);
+  font-style:italic;
+}
+/* FOOTER */
+.site-footer{
+  text-align:center;
+  padding:3rem 1rem 2rem;
+  font-family:'Cinzel',serif;
+  font-size:0.6rem;
+  letter-spacing:0.3em;
+  color:rgba(201,168,76,0.2);
+  border-top:1px solid rgba(201,168,76,0.08);
+}
+/* ==================== KEYFRAMES ==================== */
+@keyframes fadeInUp{
+  from{opacity:0;transform:translateY(20px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@keyframes biblePulse{
+  0%,100%{box-shadow:-4px 0 0 #0a0704,0 4px 20px rgba(0,0,0,0.8),0 0 40px rgba(201,168,76,0.1),inset 2px 0 8px rgba(0,0,0,0.5);}
+  50%{box-shadow:-4px 0 0 #0a0704,0 4px 20px rgba(0,0,0,0.8),0 0 60px rgba(201,168,76,0.25),inset 2px 0 8px rgba(0,0,0,0.5);}
+}
+/* ==================== RESPONSIVE ==================== */
+@media(max-width:640px){
+  .toc-grid{grid-template-columns:1fr;}
+  .fragrances-grid{grid-template-columns:1fr;}
+  .bible-inner{width:160px;height:224px;}
+  .bible-cover{width:160px;height:224px;}
+  .bible-pages{width:152px;height:218px;}
+}
+@media(max-width:480px){
+  .book-title{font-size:2rem;}
+}
+</style>
+</head>
+<body>
+<div id="custom-cursor">✝</div>
+
+<!-- LANDING -->
+<div id="screen-landing" class="screen active">
+  <canvas id="particle-canvas"></canvas>
+  <div class="landing-content">
+    <div class="brand-header">
+      <div class="brand-name">Apeiros Scents</div>
+      <div class="brand-tagline">The Scripture Collection — All 66 Books</div>
+    </div>
+    <div class="bible-scene" onclick="openBible()" title="Open the Scripture">
+      <div class="bible-inner" id="bible-inner">
+        <div class="bible-pages"></div>
+        <div class="bible-cover" id="bible-cover">
+          <div class="bible-cross">✝</div>
+          <div class="bible-title-text">APEIROS<br>SCENTS</div>
+          <div class="bible-subtitle-text">The Scripture<br>Collection</div>
+        </div>
+      </div>
+    </div>
+    <div class="open-prompt">— Open to begin —</div>
+  </div>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div id="screen-toc" class="screen">
+  <div class="toc-header">
+    <div class="toc-brand">Apeiros Scents</div>
+    <div class="toc-subtitle">The Scripture Collection — Select a Book</div>
+  </div>
+  <div style="max-width:900px;margin:0 auto">
+    <div class="toc-section-header">The Books of the Scripture</div>
+    <div class="toc-grid" id="toc-grid">
+<div class="book-row" onclick="showBook(0)" tabindex="0"><span class="book-num">1</span><span class="book-name">Genesis</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(1)" tabindex="0"><span class="book-num">2</span><span class="book-name">Exodus</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(2)" tabindex="0"><span class="book-num">3</span><span class="book-name">Leviticus</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(3)" tabindex="0"><span class="book-num">4</span><span class="book-name">Numbers</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(4)" tabindex="0"><span class="book-num">5</span><span class="book-name">Deuteronomy</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(5)" tabindex="0"><span class="book-num">6</span><span class="book-name">Joshua</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(6)" tabindex="0"><span class="book-num">7</span><span class="book-name">Judges</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(7)" tabindex="0"><span class="book-num">8</span><span class="book-name">Ruth</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(8)" tabindex="0"><span class="book-num">9</span><span class="book-name">1 Samuel</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(9)" tabindex="0"><span class="book-num">10</span><span class="book-name">2 Samuel</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(10)" tabindex="0"><span class="book-num">11</span><span class="book-name">1 Kings</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(11)" tabindex="0"><span class="book-num">12</span><span class="book-name">2 Kings</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(12)" tabindex="0"><span class="book-num">13</span><span class="book-name">1 Chronicles</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(13)" tabindex="0"><span class="book-num">14</span><span class="book-name">2 Chronicles</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(14)" tabindex="0"><span class="book-num">15</span><span class="book-name">Ezra</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(15)" tabindex="0"><span class="book-num">16</span><span class="book-name">Nehemiah</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(16)" tabindex="0"><span class="book-num">17</span><span class="book-name">Esther</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(17)" tabindex="0"><span class="book-num">18</span><span class="book-name">Job</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(18)" tabindex="0"><span class="book-num">19</span><span class="book-name">Psalms</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(19)" tabindex="0"><span class="book-num">20</span><span class="book-name">Proverbs</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(20)" tabindex="0"><span class="book-num">21</span><span class="book-name">Ecclesiastes</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(21)" tabindex="0"><span class="book-num">22</span><span class="book-name">Song of Songs</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(22)" tabindex="0"><span class="book-num">23</span><span class="book-name">Isaiah</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(23)" tabindex="0"><span class="book-num">24</span><span class="book-name">Jeremiah</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(24)" tabindex="0"><span class="book-num">25</span><span class="book-name">Lamentations</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(25)" tabindex="0"><span class="book-num">26</span><span class="book-name">Ezekiel</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(26)" tabindex="0"><span class="book-num">27</span><span class="book-name">Daniel</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(27)" tabindex="0"><span class="book-num">28</span><span class="book-name">Hosea</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(28)" tabindex="0"><span class="book-num">29</span><span class="book-name">Joel</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(29)" tabindex="0"><span class="book-num">30</span><span class="book-name">Amos</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(30)" tabindex="0"><span class="book-num">31</span><span class="book-name">Obadiah</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(31)" tabindex="0"><span class="book-num">32</span><span class="book-name">Jonah</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(32)" tabindex="0"><span class="book-num">33</span><span class="book-name">Micah</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(33)" tabindex="0"><span class="book-num">34</span><span class="book-name">Nahum</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(34)" tabindex="0"><span class="book-num">35</span><span class="book-name">Habakkuk</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(35)" tabindex="0"><span class="book-num">36</span><span class="book-name">Zephaniah</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(36)" tabindex="0"><span class="book-num">37</span><span class="book-name">Haggai</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(37)" tabindex="0"><span class="book-num">38</span><span class="book-name">Zechariah</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(38)" tabindex="0"><span class="book-num">39</span><span class="book-name">Malachi</span><span class="testament-badge">OT</span></div>
+<div class="book-row" onclick="showBook(39)" tabindex="0"><span class="book-num">40</span><span class="book-name">Matthew</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(40)" tabindex="0"><span class="book-num">41</span><span class="book-name">Mark</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(41)" tabindex="0"><span class="book-num">42</span><span class="book-name">Luke</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(42)" tabindex="0"><span class="book-num">43</span><span class="book-name">John</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(43)" tabindex="0"><span class="book-num">44</span><span class="book-name">Acts</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(44)" tabindex="0"><span class="book-num">45</span><span class="book-name">Romans</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(45)" tabindex="0"><span class="book-num">46</span><span class="book-name">1 Corinthians</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(46)" tabindex="0"><span class="book-num">47</span><span class="book-name">2 Corinthians</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(47)" tabindex="0"><span class="book-num">48</span><span class="book-name">Galatians</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(48)" tabindex="0"><span class="book-num">49</span><span class="book-name">Ephesians</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(49)" tabindex="0"><span class="book-num">50</span><span class="book-name">Philippians</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(50)" tabindex="0"><span class="book-num">51</span><span class="book-name">Colossians</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(51)" tabindex="0"><span class="book-num">52</span><span class="book-name">1 Thessalonians</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(52)" tabindex="0"><span class="book-num">53</span><span class="book-name">2 Thessalonians</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(53)" tabindex="0"><span class="book-num">54</span><span class="book-name">1 Timothy</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(54)" tabindex="0"><span class="book-num">55</span><span class="book-name">2 Timothy</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(55)" tabindex="0"><span class="book-num">56</span><span class="book-name">Titus</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(56)" tabindex="0"><span class="book-num">57</span><span class="book-name">Philemon</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(57)" tabindex="0"><span class="book-num">58</span><span class="book-name">Hebrews</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(58)" tabindex="0"><span class="book-num">59</span><span class="book-name">James</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(59)" tabindex="0"><span class="book-num">60</span><span class="book-name">1 Peter</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(60)" tabindex="0"><span class="book-num">61</span><span class="book-name">2 Peter</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(61)" tabindex="0"><span class="book-num">62</span><span class="book-name">1 John</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(62)" tabindex="0"><span class="book-num">63</span><span class="book-name">2 John</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(63)" tabindex="0"><span class="book-num">64</span><span class="book-name">3 John</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(64)" tabindex="0"><span class="book-num">65</span><span class="book-name">Jude</span><span class="testament-badge nt">NT</span></div>
+<div class="book-row" onclick="showBook(65)" tabindex="0"><span class="book-num">66</span><span class="book-name">Revelation</span><span class="testament-badge nt">NT</span></div>
+    </div>
+  </div>
+  <div class="site-footer">© APEIROS SCENTS — THE SCRIPTURE COLLECTION — ALL 66 BOOKS</div>
+</div>
+
+<!-- BOOK PAGE -->
+<div id="screen-book" class="screen">
+  <div class="book-page" id="book-page-content"></div>
+  <div class="site-footer">© APEIROS SCENTS — THE SCRIPTURE COLLECTION</div>
+</div>
+
+<script>
+const booksData = [{"name":"Genesis","testament":"OT","chapter":1,"lineName":"The Genesis Collection","subtitle":"In the beginning, there was scent.","fragrances":[{"numeral":"I","name":"Eden's First Light","desc":"The pristine air of paradise before the fall — green, alive, luminous with morning.","top":"Fig leaf, green apple, dew","heart":"Sacred cedar, white lily, lotus","base":"Soft moss, musk, amber"},{"numeral":"II","name":"The Breath of Adam","desc":"Warm earth breathed into life — primal, tender, inexplicably sacred.","top":"Bergamot, fresh earth, green herbs","heart":"Sandalwood, vetiver, iris","base":"White amber, warm skin musk, tonka"},{"numeral":"III","name":"Serpent's Garden","desc":"Sweet forbidden knowledge — lush, dangerous, impossible to resist.","top":"Dark rose, ripe fig, black cherry","heart":"Oud, smoked incense, saffron","base":"Black vetiver, leather, resin"},{"numeral":"IV","name":"The Flood Accord","desc":"Rain falling on ancient earth — petrichor, wood, the grief of a cleansed world.","top":"Petrichor, ozone, cold rain","heart":"Driftwood, cypress, grey musk","base":"Wet stone, sea salt, benzoin"},{"numeral":"V","name":"Covenant Smoke","desc":"Sacred fire ascending — the first promise made in smoke and sacrifice.","top":"Frankincense, burnt wood","heart":"Myrrh, labdanum, sacred resins","base":"Ash, smoke, deep amber"}]},{"name":"Exodus","testament":"OT","chapter":2,"lineName":"The Exodus Accord","subtitle":"Walk through the fire, walk through the sea.","fragrances":[{"numeral":"I","name":"Burning Bush","desc":"Flame that does not consume — cedar and fire, sacred and strange.","top":"Scorched wood, orange blossom","heart":"Cedarwood, desert herbs, smoke","base":"Amber, dry earth, ash"},{"numeral":"II","name":"The Desert Wind","desc":"Forty years of wandering — heat, sand, and desperate prayer.","top":"Sand accord, hot rock, thyme","heart":"Dry vetiver, caraway, sagebrush","base":"Mineral musk, stone, dry wood"},{"numeral":"III","name":"Pillar of Cloud","desc":"Walking in divine shadow — cool and vast, reassuring above the heat.","top":"Cool air, eucalyptus, ozone","heart":"White musk, iris, orris root","base":"Light ambergris, soft wood, vanilla"},{"numeral":"IV","name":"Manna","desc":"Heaven-sent sustenance — impossibly sweet, inexplicably satisfying.","top":"Honeydew, white flowers, light citrus","heart":"Honey, beeswax, heliotrope","base":"Warm musk, sandalwood, vanilla"},{"numeral":"V","name":"The Red Sea","desc":"Walls of water standing still — salt, awe, and the impossible made real.","top":"Sea spray, aquatic accord","heart":"Blue lotus, sea grass, salt","base":"Driftwood, ambergris, deep musk"}]},{"name":"Leviticus","testament":"OT","chapter":3,"lineName":"The Levitical Rites","subtitle":"Consecrated smoke ascending toward heaven.","fragrances":[{"numeral":"I","name":"The Holy Incense","desc":"Compounded from the sacred recipe — stacte, onycha, galbanum, frankincense.","top":"Frankincense, galbanum, green resins","heart":"Onycha, labdanum, spiced smoke","base":"Deep incense, myrrh, benzoin"},{"numeral":"II","name":"Anointing Oil","desc":"The sacred blend of myrrh and cinnamon, calamus and cassia poured over kings.","top":"Cinnamon bark, cassia","heart":"Myrrh, calamus, sweet flag","base":"Olive oil accord, warm amber, beeswax"},{"numeral":"III","name":"Day of Atonement","desc":"Solemn and still — the scent of fasting, contrition, and holy mercy.","top":"Cool stone, quiet herbs","heart":"Cedarwood, hyssop, white iris","base":"Sandalwood, soft musk, tonka"},{"numeral":"IV","name":"Pure Gold Altar","desc":"The golden table before the veil — rich, warm, untouchable.","top":"Saffron, golden amber","heart":"Labdanum, oud, resins","base":"Gold amber, musk, warm wood"}]},{"name":"Numbers","testament":"OT","chapter":4,"lineName":"The Wilderness Accord","subtitle":"Counted, journeyed, tried, and found faithful.","fragrances":[{"numeral":"I","name":"The Census","desc":"Dust rising from a million counted souls — mineral, human, ancient.","top":"Mineral dust, dry herbs, caraway","heart":"Vetiver, dry wood, hay","base":"Earth, stone, base musk"},{"numeral":"II","name":"Balaam's Blessing","desc":"Words meant to curse transformed to beauty — surprising, golden, luminous.","top":"Bergamot, lemon verbena","heart":"Rose absolute, golden amber, saffron","base":"Benzoin, musk, sandalwood"},{"numeral":"III","name":"Pillar of Fire","desc":"Night navigation — fire in darkness, warmth against the cold desert void.","top":"Burning amber, hot spice","heart":"Smoked rose, cardamom, cinnamon","base":"Deep amber, oud, dark musk"},{"numeral":"IV","name":"Water from Rock","desc":"Impossible water in impossible places — cold, clean, miraculous.","top":"Cold mineral water, green accord","heart":"Aquatic florals, cool iris","base":"Clean musk, soft wood, light amber"}]},{"name":"Deuteronomy","testament":"OT","chapter":5,"lineName":"The Second Law","subtitle":"Remember. Return. Love with all your heart.","fragrances":[{"numeral":"I","name":"Moses on Nebo","desc":"Standing at the edge of the promised land, looking across — bittersweet, majestic.","top":"Mountain air, pine, cold stone","heart":"Cedar, sage, desert herbs","base":"Dry earth, amber, soft wood"},{"numeral":"II","name":"Land of Milk and Honey","desc":"The promised horizon — rich, sweet, forever beckoning.","top":"Fresh fig, honey, orange blossom","heart":"Beeswax, warm amber, jasmine","base":"Sandalwood, vanilla, golden musk"},{"numeral":"III","name":"Shema","desc":"The single most sacred declaration — clear, pure, total.","top":"White cedar, clean herbs","heart":"Iris, white musk, orris","base":"Sandalwood, warm base, soft amber"},{"numeral":"IV","name":"Covenant Renewal","desc":"The ancient promise spoken again — reaffirmed in smoke and blessing.","top":"Incense, cedar, warm resin","heart":"Labdanum, oud, sacred woods","base":"Deep amber, musk, benzoin"}]},{"name":"Joshua","testament":"OT","chapter":6,"lineName":"The Conquest Collection","subtitle":"Be strong and courageous — the land is yours.","fragrances":[{"numeral":"I","name":"Jericho's Walls","desc":"Stone and silence before the fall — tension, power, inevitability.","top":"Mineral stone, dry air","heart":"Cedarwood, vetiver, dark herbs","base":"Leather, deep amber, smoky musk"},{"numeral":"II","name":"Rahab's Scarlet Thread","desc":"A crimson cord and a promise — courage, mercy, salvation.","top":"Red rose, scarlet saffron","heart":"Warm spice, incense, amber rose","base":"Rich leather, dark wood, musk"},{"numeral":"III","name":"The Jordan Crossing","desc":"Water stopped, feet on dry ground — faith manifest, the impossible done.","top":"River water, green rushes","heart":"Cool aquatic, clean iris","base":"Damp earth, wood, fresh musk"},{"numeral":"IV","name":"Canaan's Plenty","desc":"The land flowing — vineyards, olive groves, pomegranate and fig.","top":"Pomegranate, olive leaf, vine","heart":"Fig, grape, orris root","base":"Warm earth, sandalwood, amber"}]},{"name":"Judges","testament":"OT","chapter":7,"lineName":"The Judges Line","subtitle":"Every man did what was right in his own eyes.","fragrances":[{"numeral":"I","name":"Samson's Strength","desc":"Massive, wild, barely contained — raw power and honey from the lion.","top":"Wild honey, crushed herbs","heart":"Dark woods, cedar, vetiver","base":"Leather, amber, animalic musk"},{"numeral":"II","name":"Deborah's Palm","desc":"A woman beneath palm trees, judging Israel — cool, commanding, wise.","top":"Palm accord, jasmine, citrus","heart":"Cedar, iris, white flowers","base":"Warm amber, sandalwood, light musk"},{"numeral":"III","name":"Gideon's Fleece","desc":"Dew on wool — the small, quiet miracle of faithful waiting.","top":"Morning dew, clean linen","heart":"White musk, orris, soft herbs","base":"Cashmere, warm wood, amber"},{"numeral":"IV","name":"The Cycle Breaks","desc":"Sin, oppression, cry, deliverance — the ancient rhythm of human nature.","top":"Dark spice, smoked vetiver","heart":"Oud, dark rose, saffron","base":"Resin, leather, deep musk"}]},{"name":"Ruth","testament":"OT","chapter":8,"lineName":"The Ruth Collection","subtitle":"Wherever you go, I will go.","fragrances":[{"numeral":"I","name":"Gleaning at Dusk","desc":"The last light on golden grain — warm, gentle, deeply human.","top":"Wheat, warm barley, hay","heart":"Orris, amber, soft florals","base":"Warm musk, sandalwood, benzoin"},{"numeral":"II","name":"Loyal Heart","desc":"A loyalty beyond reason — steadfast, warm, quietly luminous.","top":"Bergamot, clean herbs","heart":"White rose, iris, soft amber","base":"Cashmere musk, tonka, sandalwood"},{"numeral":"III","name":"Boaz's Blessing","desc":"Kinsman-redeemer — shelter, provision, the fragrance of grace.","top":"Grain accord, light spice","heart":"Amber rose, golden resins","base":"Warm wood, musk, light vanilla"},{"numeral":"IV","name":"Bethlehem Harvest","desc":"A small city full of grain and mercy — earthy, sweet, homecoming.","top":"Fig, warm grain, orchard","heart":"Honey, amber, dried flower","base":"Earth, wood, soft musk"}]},{"name":"1 Samuel","testament":"OT","chapter":9,"lineName":"The Anointing","subtitle":"A man after God's own heart was anointed in secret.","fragrances":[{"numeral":"I","name":"Oil of Anointing","desc":"Poured over a shepherd boy — sacred, unexpected, fragrant with destiny.","top":"Olive oil, warm herbs, cinnamon","heart":"Myrrh, spikenard, saffron","base":"Deep amber, warm musk, benzoin"},{"numeral":"II","name":"David and Goliath","desc":"The stone and the giant — audacity, wind, the sudden decisive moment.","top":"Fresh stone, ozone, cedar","heart":"Dry wood, cold herbs, mineral","base":"Earth, leather, vetiver"},{"numeral":"III","name":"Saul's Jealousy","desc":"Dark, restless, consumed — the scent of a man at war with himself.","top":"Bitter citrus, dark smoke","heart":"Oud, leather, dark iris","base":"Tar, deep musk, black amber"},{"numeral":"IV","name":"Hannah's Prayer","desc":"Lips moving, no sound — the rawest, most sincere fragrance of longing.","top":"Salt tears, white cedar","heart":"White lily, iris, quiet musk","base":"Soft amber, sandalwood, clean base"}]},{"name":"2 Samuel","testament":"OT","chapter":10,"lineName":"The Royal Court","subtitle":"The shepherd became a king — brilliant and broken.","fragrances":[{"numeral":"I","name":"Jerusalem Gold","desc":"The city David captured, made holy — warm stone, cedar, ancient royalty.","top":"Bergamot, golden amber, citrus","heart":"Cedarwood, labdanum, warm rose","base":"Deep amber, oud, sandalwood"},{"numeral":"II","name":"King's Lament","desc":"O Absalom, my son — grief too large for any fragrance to hold.","top":"Bitter herbs, salt, cold cedar","heart":"Dark wood, incense, cold iris","base":"Ash, smoky musk, deep amber"},{"numeral":"III","name":"Psalm at Midnight","desc":"The harpist composing by moonlight — tender, devotional, achingly beautiful.","top":"Cool moonlit air, light cedar","heart":"Jasmine, amber rose, soft resins","base":"Sandalwood, warm musk, benzoin"},{"numeral":"IV","name":"Bathsheba","desc":"The most consequential glance — beauty, desire, catastrophic and luminous.","top":"Jasmine absolute, bergamot","heart":"Rose, tuberose, warm amber","base":"Musk, sandalwood, dark honey"}]},{"name":"1 Kings","testament":"OT","chapter":11,"lineName":"The King's Court","subtitle":"Solomon's wisdom filled the temple with golden smoke.","fragrances":[{"numeral":"I","name":"Solomon's Temple","desc":"Cedar from Lebanon, gold from Ophir — the most magnificent house ever built.","top":"Cedar absolute, incense, golden resin","heart":"Oud, labdanum, warm spice","base":"Gold amber, deep musk, sandalwood"},{"numeral":"II","name":"Queen of Sheba","desc":"She came bearing spices and gold, testing his wisdom with riddles.","top":"Exotic spice, warm citrus, cardamom","heart":"Oud rose, saffron, dark amber","base":"Musk, resins, patchouli"},{"numeral":"III","name":"A Thousand Wives","desc":"Every perfume from every nation — overwhelming, complex, impossible.","top":"Rotating spice, complex florals","heart":"Multi-rose, oud, amber","base":"Deep musk, resins, warm base"},{"numeral":"IV","name":"Elijah on Carmel","desc":"Fire falling from heaven on a soaked altar — impossible combustion.","top":"Wet stone, scorched wood","heart":"Burning amber, cedar, desert herbs","base":"Ash, smoke, deep resin"},{"numeral":"V","name":"Still Small Voice","desc":"Not in the wind, nor the earthquake, nor the fire — but the gentle whisper.","top":"Quiet herbs, soft cedar","heart":"Iris, soft musk, white wood","base":"Cashmere, clean base, warm amber"}]},{"name":"2 Kings","testament":"OT","chapter":12,"lineName":"The Prophets' Fire","subtitle":"Chariots of fire descended and the prophet was taken up.","fragrances":[{"numeral":"I","name":"Elijah's Chariot","desc":"Fire and wind and impossible ascension — the scent of translation.","top":"Burning cedar, hot amber, ozone","heart":"Smoke, resins, dry spice","base":"Ash, deep incense, golden amber"},{"numeral":"II","name":"Elisha's Mantle","desc":"The double portion — the taken-up prophet's fragrance inherited.","top":"Warm cedar, dry herbs","heart":"Sandalwood, labdanum, iris","base":"Amber, musk, soft wood"},{"numeral":"III","name":"Naaman's Healing","desc":"Leprosy washed away in seven dips of the Jordan — clean, new, miraculous.","top":"River water, clean herbs, citrus","heart":"Fresh iris, cool aquatic","base":"Soft musk, clean wood, light amber"},{"numeral":"IV","name":"Assyrian Siege","desc":"The army that became ash by morning — cold air after catastrophe.","top":"Cold morning air, ash","heart":"Bitter wood, dark vetiver","base":"Smoke, stone, deep base musk"}]},{"name":"1 Chronicles","testament":"OT","chapter":13,"lineName":"The Chronicles Line","subtitle":"Every name written, every generation remembered.","fragrances":[{"numeral":"I","name":"Lineage","desc":"Deep ancestral roots — the scent of who you came from and who you are.","top":"Dry wood, ancient cedar","heart":"Vetiver, patchouli, dark amber","base":"Earth, base musk, sandalwood"},{"numeral":"II","name":"David's Preparations","desc":"Gathering materials for a temple he would never build — devotion, cedar, gold.","top":"Cedar absolute, warm spice","heart":"Oud, labdanum, golden amber","base":"Deep wood, musk, benzoin"},{"numeral":"III","name":"Temple Plans","desc":"The architectural vision given in spirit — precise, sacred, golden.","top":"Dry cedar, sharp herbs","heart":"Resins, warm spice, amber","base":"Gold amber, sandalwood, musk"}]},{"name":"2 Chronicles","testament":"OT","chapter":14,"lineName":"The Temple Chronicles","subtitle":"Glory filled the house — no priest could stand to minister.","fragrances":[{"numeral":"I","name":"Solomon's Consecration","desc":"The cloud descending into the temple — overwhelming, divine, impossible to remain.","top":"Sacred incense, frankincense, smoke","heart":"Labdanum, myrrh, oud","base":"Deep amber, resins, benzoin"},{"numeral":"II","name":"The Queen's Visit","desc":"She was left breathless — the wealth, the wisdom, the sacred smoke.","top":"Exotic spice, warm citrus","heart":"Oud rose, amber, saffron","base":"Deep musk, patchouli, resins"},{"numeral":"III","name":"Temple Destruction","desc":"What was holy broken, what was beautiful burned — grief, ash, silence.","top":"Ash, bitter wood","heart":"Cold smoke, dark oud","base":"Burned amber, somber musk"},{"numeral":"IV","name":"Josiah's Revival","desc":"A young king, a forgotten scroll, a nation returning — dawn after darkness.","top":"Fresh dawn air, clean herbs","heart":"Cedar, white iris, soft amber","base":"Warm musk, sandalwood, benzoin"}]},{"name":"Ezra","testament":"OT","chapter":15,"lineName":"The Return Collection","subtitle":"From Babylon to Jerusalem — the long way home.","fragrances":[{"numeral":"I","name":"Exile's End","desc":"Seventy years done — the smell of returning, of being allowed to go home.","top":"Fresh road dust, morning air","heart":"Warm cedar, iris, soft amber","base":"Home musk, sandalwood, benzoin"},{"numeral":"II","name":"The Edict of Cyrus","desc":"A pagan king moved to restore the temple — impossible grace, generous wonder.","top":"Persian rose, saffron, warm citrus","heart":"Oud, amber, labdanum","base":"Musk, sandalwood, deep amber"},{"numeral":"III","name":"The Restored Altar","desc":"Built again on its foundation — cedar, incense, the fragrance of recommitment.","top":"Frankincense, cedar, herbs","heart":"Labdanum, myrrh, warm wood","base":"Amber, resin, deep musk"}]},{"name":"Nehemiah","testament":"OT","chapter":16,"lineName":"The Rebuilder's Line","subtitle":"The wall rose in fifty-two days against all opposition.","fragrances":[{"numeral":"I","name":"Night Survey","desc":"Riding through rubble by moonlight, alone with the burden of what must be done.","top":"Night air, cold stone, cedar","heart":"Dark iris, vetiver, cold herbs","base":"Stone, earth, deep musk"},{"numeral":"II","name":"Builder's Hands","desc":"Trowel in one hand, sword in the other — labor, vigilance, determination.","top":"Dry wood, mineral, sawdust","heart":"Cedar, vetiver, dry amber","base":"Earth, stone, base wood"},{"numeral":"III","name":"The Wall Completed","desc":"Fifty-two days — impossible done, enemies silenced, hearts rejoicing.","top":"Fresh cedar, clean air","heart":"Warm amber, iris, light wood","base":"Sandalwood, musk, soft benzoin"}]},{"name":"Esther","testament":"OT","chapter":17,"lineName":"The Queen's Accord","subtitle":"Perhaps you were born for such a time as this.","fragrances":[{"numeral":"I","name":"Twelve Months of Beauty","desc":"Six months with oil of myrrh, six with spices — the queen's preparation.","top":"Myrrh oil, jasmine, warm citrus","heart":"Rose absolute, spikenard, saffron","base":"Amber, musk, benzoin"},{"numeral":"II","name":"The Inner Court","desc":"She stood where no one uninvited stood — courage as fragrance.","top":"Royal amber, warm cedar","heart":"Saffron, rose, oud","base":"Deep musk, labdanum, resin"},{"numeral":"III","name":"For Such a Time","desc":"Destiny fragrant in the air — the exact right person at the exact right moment.","top":"Persian rose, warm spice","heart":"Amber, saffron, jasmine","base":"Sandalwood, musk, deep amber"},{"numeral":"IV","name":"The King's Favor","desc":"The golden scepter extended — relief, beauty, power graciously wielded.","top":"Golden amber, light cedar","heart":"Warm rose, labdanum, soft spice","base":"Musk, amber, sandalwood"}]},{"name":"Job","testament":"OT","chapter":18,"lineName":"The Patience Collection","subtitle":"Though he slay me, yet will I trust him.","fragrances":[{"numeral":"I","name":"The First Stripping","desc":"Everything taken in a day — the silence after devastation.","top":"Cold air, dry herbs, ash","heart":"Cold vetiver, dark wood, bitter iris","base":"Ash, smoke, hollow musk"},{"numeral":"II","name":"The Ash Heap","desc":"Sitting in ashes, scraping wounds — the lowest point a human can reach.","top":"Ash, cold stone, bitter herbs","heart":"Dark wood, cold smoke","base":"Mineral, earth, base musk"},{"numeral":"III","name":"Where Were You","desc":"God's answer from the whirlwind — vast, thundering, beyond comprehension.","top":"Storm air, thunder accord","heart":"Wild herbs, dark cedar, ozone","base":"Stone, deep earth, primal musk"},{"numeral":"IV","name":"Restoration","desc":"Twice as much returned — the fragrance of impossible grace after impossible loss.","top":"Fresh blooms, warm citrus","heart":"Rose, amber, warm spice","base":"Sandalwood, golden musk, benzoin"}]},{"name":"Psalms","testament":"OT","chapter":19,"lineName":"The Psaltery","subtitle":"My heart is stirred by a noble theme.","fragrances":[{"numeral":"I","name":"The Lord Is My Shepherd","desc":"Green pastures, still waters — the most peaceful fragrance ever composed.","top":"Fresh grass, morning dew","heart":"White flowers, soft cedar, iris","base":"Cashmere, warm amber, soft musk"},{"numeral":"II","name":"Selah","desc":"The pause between verses — breath held, then released.","top":"Quiet cedar, clean air","heart":"Soft musk, orris, light amber","base":"Warm wood, gentle base"},{"numeral":"III","name":"Songs in the Night","desc":"Praise when it costs something — midnight liturgy, tears and gold.","top":"Night air, jasmine","heart":"Dark amber, warm rose, incense","base":"Deep musk, amber, resins"},{"numeral":"IV","name":"Hyssop","desc":"Cleanse me with hyssop and I shall be white as snow — the scent of forgiveness.","top":"Hyssop herb, clean white cedar","heart":"Snow accord, white musk, iris","base":"Clean base, soft amber, cashmere"},{"numeral":"V","name":"Jubilate Deo","desc":"Make a joyful noise — radiant, open-hearted, luminous.","top":"Bergamot, lemon, bright herbs","heart":"Jasmine, amber, warm florals","base":"Sandalwood, musk, light amber"}]},{"name":"Proverbs","testament":"OT","chapter":20,"lineName":"The Wisdom Line","subtitle":"Wisdom cries aloud in the street, at the crossroads.","fragrances":[{"numeral":"I","name":"Fear of the Lord","desc":"The beginning of wisdom — reverent, clean, ancient-deep.","top":"Frankincense, cedar, cool herbs","heart":"Myrrh, iris, warm wood","base":"Deep amber, sandalwood, clean musk"},{"numeral":"II","name":"Honey and Comb","desc":"Sweet words from wise lips — luxurious, golden, satisfying.","top":"Honey accord, bergamot","heart":"Beeswax, tuberose, warm amber","base":"Vanilla, sandalwood, golden musk"},{"numeral":"III","name":"The Virtuous Woman","desc":"She is clothed with strength and dignity — confident, warm, unafraid.","top":"Warm cedar, clean linen","heart":"Rose, amber, soft spice","base":"Sandalwood, musk, warm benzoin"},{"numeral":"IV","name":"A Gentle Answer","desc":"Turns away wrath — smooth, calming, disarmingly gentle.","top":"Soft herbs, clean air","heart":"Iris, white musk, soft amber","base":"Cashmere, warm wood, light tonka"}]},{"name":"Ecclesiastes","testament":"OT","chapter":21,"lineName":"The Preacher's Accord","subtitle":"Vanity of vanities — all is vanity.","fragrances":[{"numeral":"I","name":"Wind and Vapor","desc":"Chasing after wind — the beautiful futility of every human endeavor.","top":"Wind accord, vetiver, dry herbs","heart":"Grey musk, cold wood, iris","base":"Stone, mineral, fading amber"},{"numeral":"II","name":"Under the Sun","desc":"Nothing new — the ancient weariness of one who has seen everything.","top":"Dry cedar, warm stone","heart":"Vetiver, leather, dark amber","base":"Earth, deep musk, wood"},{"numeral":"III","name":"A Time for Everything","desc":"Birth and death, weeping and laughing — every opposite held together.","top":"Contrasting citrus and smoke","heart":"Rose and oud together","base":"Amber, musk, both light and dark"},{"numeral":"IV","name":"Eat, Drink, Be Merry","desc":"The Preacher's concession to joy — warm, indulgent, mortal pleasure.","top":"Wine accord, spiced citrus","heart":"Amber, rose, warm spice","base":"Musk, benzoin, sweet wood"}]},{"name":"Song of Songs","testament":"OT","chapter":22,"lineName":"The Song Collection","subtitle":"I am my beloved's and my beloved is mine.","fragrances":[{"numeral":"I","name":"Spikenard","desc":"Let him kiss me — the most romantic verse in scripture, the most romantic note.","top":"Spikenard absolute, warm rose","heart":"Rose de Mai, amber, saffron","base":"Musk, sandalwood, warm amber"},{"numeral":"II","name":"Myrrh and Cinnamon","desc":"All his garments smell of myrrh — the bridegroom's intoxicating presence.","top":"Cinnamon, warm spice, bergamot","heart":"Myrrh, dark amber, oud","base":"Sandalwood, deep musk, resin"},{"numeral":"III","name":"The Garden Enclosed","desc":"A garden locked — a spring sealed — for the beloved alone.","top":"Garden blooms, nard, saffron","heart":"Henna, calamus, cinnamon","base":"Frankincense, myrrh, aloes"},{"numeral":"IV","name":"Do Not Stir Love","desc":"Awake it not until it pleases — the fragrance of patient, aching anticipation.","top":"Wild flowers, soft musk","heart":"Jasmine, amber, soft rose","base":"Cashmere, vanilla, warm musk"},{"numeral":"V","name":"Vineyards in Bloom","desc":"The little foxes that spoil the vines — tenderness, care, beauty guarded.","top":"Vine flowers, fig leaf, citrus","heart":"White flowers, light amber","base":"Warm wood, soft musk, benzoin"}]},{"name":"Isaiah","testament":"OT","chapter":23,"lineName":"The Prophet's Vision","subtitle":"Holy, holy, holy — the whole earth is full of his glory.","fragrances":[{"numeral":"I","name":"The Burning Coal","desc":"Seraphim, tongs, the live coal touching lips — cleansing fire, unwanted and necessary.","top":"Hot amber, scorched wood","heart":"Burning incense, dark cedar","base":"Ash, deep resin, smoke"},{"numeral":"II","name":"Immanuel","desc":"Butter and honey shall he eat — the fragrance of the promised child.","top":"Fresh milk, honey, warm cedar","heart":"Amber, soft spice, beeswax","base":"Warm musk, sandalwood, vanilla"},{"numeral":"III","name":"Suffering Servant","desc":"Despised and rejected — the fragrance of undeserved grace.","top":"Bitter herbs, cold stone","heart":"Dark wood, cold iris","base":"Ash, smoke, quiet musk"},{"numeral":"IV","name":"New Creation","desc":"Behold, I make all things new — the scent of the world reborn.","top":"Fresh dawn, green accord, citrus","heart":"White flowers, clean cedar","base":"Soft musk, warm amber, sandalwood"}]},{"name":"Jeremiah","testament":"OT","chapter":24,"lineName":"The Weeping Prophet","subtitle":"Is there no balm in Gilead?","fragrances":[{"numeral":"I","name":"Balm of Gilead","desc":"Is there no physician there? The question heavier than the answer.","top":"Healing herbs, resinous balm","heart":"Labdanum, soft amber, cedar","base":"Resin, musk, warm wood"},{"numeral":"II","name":"The Prophet's Tears","desc":"If only my head were a spring of water — grief channeled into word.","top":"Salt water, cold cedar","heart":"Dark iris, soft smoke","base":"Grey musk, stone, quiet amber"},{"numeral":"III","name":"Cursed the Day","desc":"He cursed his birth — the scent of a man who loved too much.","top":"Bitter citrus, cold herbs","heart":"Dark oud, cold vetiver","base":"Stone, dark musk, smoke"},{"numeral":"IV","name":"The Potter's Wheel","desc":"The clay in the potter's hands — being remade, yielding, trusting.","top":"Wet clay, earth, herbs","heart":"Warm amber, cedar, soft iris","base":"Earth, musk, warm wood"}]},{"name":"Lamentations","testament":"OT","chapter":25,"lineName":"The Lament Collection","subtitle":"Is it nothing to you, all ye that pass by?","fragrances":[{"numeral":"I","name":"How Desolate","desc":"How deserted lies the city once so full of people — ruins, ash, absence.","top":"Cold ash, stone, bitter wood","heart":"Dark oud, cold smoke","base":"Ash, stone, hollow musk"},{"numeral":"II","name":"Great Is Thy Faithfulness","desc":"New every morning in the middle of grief — the impossible mercy still present.","top":"Morning dew, fresh cedar","heart":"Clean amber, iris, soft light","base":"Warm musk, sandalwood, benzoin"},{"numeral":"III","name":"Yet I Have Hope","desc":"The three-fold yes buried in the center of the darkest book.","top":"Thin sunlight, cold herbs","heart":"Soft amber, quiet cedar","base":"Warm musk, gentle base"}]},{"name":"Ezekiel","testament":"OT","chapter":26,"lineName":"The Vision Line","subtitle":"Wheels within wheels — vast, living, incandescent.","fragrances":[{"numeral":"I","name":"The Chariot-Throne","desc":"Four living creatures, four wheels, the glory of the Lord — the scent of sacred vertigo.","top":"Burning amber, hot ozone","heart":"Incense, scorched cedar","base":"Deep amber, smoke, resin"},{"numeral":"II","name":"Valley of Dry Bones","desc":"Can these bones live? — the rattling before the breath.","top":"Dry stone, mineral, cold air","heart":"Cold wood, dry herbs","base":"Stone, earth, deep musk"},{"numeral":"III","name":"Breath on the Bones","desc":"The four winds summoned to breathe on the slain — life from death.","top":"Wind accord, fresh cedar, ozone","heart":"Clean herbs, soft iris","base":"Fresh musk, warm base"},{"numeral":"IV","name":"The Eternal River","desc":"Water from the threshold, deepening as it flows — life-giving, unstoppable.","top":"Fresh water, river accord","heart":"Water lily, cool iris, aquatic","base":"Clean musk, soft wood, light amber"}]},{"name":"Daniel","testament":"OT","chapter":27,"lineName":"The Daniel Accord","subtitle":"My God sent his angel and shut the lions' mouths.","fragrances":[{"numeral":"I","name":"Resolve","desc":"Choosing vegetables over the king's feast — quiet defiance, pure conviction.","top":"Green herbs, crisp cedar","heart":"Clean iris, soft amber","base":"Warm musk, light sandalwood"},{"numeral":"II","name":"Fiery Furnace","desc":"The fourth man walking with them in the fire — deliverance beyond understanding.","top":"Hot amber, burning wood, ozone","heart":"Scorched cedar, dark resins","base":"Smoke, deep amber, ash"},{"numeral":"III","name":"The Lion's Den","desc":"Morning and the king running — no wound found on him, sealed by God.","top":"Cold stone, morning air","heart":"Dark cedar, amber, quiet herbs","base":"Stone, deep musk, warm amber"},{"numeral":"IV","name":"Ancient of Days","desc":"White garments, white hair, wheels of fire, ten thousand thousands — the end of all visions.","top":"Cold fire, ozone, rare incense","heart":"Sacred wood, white amber","base":"Deep resin, ancient musk, smoke"}]},{"name":"Hosea","testament":"OT","chapter":28,"lineName":"The Unfailing Love","subtitle":"I will betroth you to me forever.","fragrances":[{"numeral":"I","name":"Come Back, My Love","desc":"God pursuing a wayward people — relentless, patient, heartbroken love.","top":"Warm rose, cedar, amber","heart":"Soft oud, rose absolute","base":"Deep amber, musk, benzoin"},{"numeral":"II","name":"Valley of Achor","desc":"A door of hope in the valley of trouble — small light in very large dark.","top":"Thin dawn light, cold cedar","heart":"Soft amber, iris, cold herbs","base":"Musk, warm wood, faint honey"},{"numeral":"III","name":"Like Dew","desc":"I will be like dew to Israel — gentle, consistent, quietly life-giving.","top":"Morning dew, soft herbs","heart":"White flowers, soft musk","base":"Warm amber, cashmere, sandalwood"}]},{"name":"Joel","testament":"OT","chapter":29,"lineName":"The Outpouring","subtitle":"I will pour out my spirit on all flesh.","fragrances":[{"numeral":"I","name":"The Locust Army","desc":"Darkening the sun, devouring everything — the stripping before the restoration.","top":"Bitter herbs, dry stone","heart":"Dark vetiver, cold wood","base":"Earth, mineral, hollow musk"},{"numeral":"II","name":"New Wine and Oil","desc":"I will restore the years the locust has eaten — abundance after devastation.","top":"Fresh grape, citrus, warm spice","heart":"Amber, olive, warm florals","base":"Musk, sandalwood, sweet wood"},{"numeral":"III","name":"Spirit Poured","desc":"Sons and daughters prophesying, old men dreaming — the divine given freely.","top":"Ozone, fresh cedar, light citrus","heart":"Clean amber, white florals","base":"Warm musk, soft wood"}]},{"name":"Amos","testament":"OT","chapter":30,"lineName":"The Justice Line","subtitle":"Let justice roll on like a river, righteousness like a never-failing stream.","fragrances":[{"numeral":"I","name":"The Plumb Line","desc":"Set against the wall of Israel — straight, unsparing, exact.","top":"Cold stone, mineral, cedar","heart":"Dry vetiver, dark wood","base":"Stone, earth, base musk"},{"numeral":"II","name":"River of Justice","desc":"Rolling unstoppable — cool, powerful, impossible to dam.","top":"Fresh river accord, cold herbs","heart":"Aquatic, clean cedar","base":"Stone, clean musk, soft wood"},{"numeral":"III","name":"Shepherd of Tekoa","desc":"A simple shepherd given a prophet's burden — earthy, direct, uncompromising.","top":"Dry earth, wool accord","heart":"Cedar, vetiver, herbs","base":"Earth, warm musk, stone"}]},{"name":"Obadiah","testament":"OT","chapter":31,"lineName":"The Obadiah Accord","subtitle":"Though you soar like the eagle, I will bring you down.","fragrances":[{"numeral":"I","name":"Eagle's Nest","desc":"Set high among the stars, proud and remote — the height before the fall.","top":"Cold mountain air, cedar","heart":"Dry herbs, stone","base":"Rock, mineral musk, cold wood"},{"numeral":"II","name":"Pride's Fall","desc":"The certain, final unmaking of arrogance — cold stone and bitter truth.","top":"Bitter herbs, cold ash","heart":"Dark vetiver, cold wood","base":"Stone, earth, fallen musk"},{"numeral":"III","name":"Deliverers on Zion","desc":"The final word of Obadiah — the kingdom shall be the Lord's.","top":"Mountain cedar, fresh air","heart":"Amber, warm herbs","base":"Warm musk, sandalwood"}]},{"name":"Jonah","testament":"OT","chapter":32,"lineName":"The Deep Water","subtitle":"Out of the belly of the deep I cried, and he heard me.","fragrances":[{"numeral":"I","name":"Running Away","desc":"The ticket to Tarshish, the sea widening between him and his calling.","top":"Salt sea, cedar deck","heart":"Aquatic, brine, wood smoke","base":"Driftwood, sea musk"},{"numeral":"II","name":"The Belly of the Deep","desc":"Three days in darkness, seaweed wrapped around the head — surrender.","top":"Cold salt water, sea grass","heart":"Dark aquatic, cold stone","base":"Deep sea musk, stone, cold amber"},{"numeral":"III","name":"Nineveh Repents","desc":"A whole city turning in a day — the scent of a miracle of mercy.","top":"Warm cedar, incense","heart":"Frankincense, amber, soft herbs","base":"Sandalwood, musk, benzoin"},{"numeral":"IV","name":"The Worm","desc":"The prophet sulking under a plant that dies — human pettiness meeting divine tenderness.","top":"Dry earth, withered herbs","heart":"Bitter wood, dry amber","base":"Earth, stone, quiet musk"}]},{"name":"Micah","testament":"OT","chapter":33,"lineName":"The Micah Line","subtitle":"Act justly. Love mercy. Walk humbly.","fragrances":[{"numeral":"I","name":"Justice","desc":"Do justly — clean, uncompromising, the scent of correct action.","top":"Clean cedar, cold herbs","heart":"Dry vetiver, cold iris","base":"Stone, clean musk, earth"},{"numeral":"II","name":"Mercy","desc":"Love mercy — warm, forgiving, the scent of grace freely given.","top":"Soft rose, warm cedar","heart":"Amber, soft wood, iris","base":"Cashmere, warm musk, benzoin"},{"numeral":"III","name":"Humility","desc":"Walk humbly — quietly confident, unassuming, deep.","top":"Soft herbs, clean air","heart":"Wood violet, iris, soft cedar","base":"Soft musk, warm base"},{"numeral":"IV","name":"Bethlehem","desc":"But you, Bethlehem — the smallest place for the greatest birth.","top":"Frankincense, cedar, myrrh","heart":"Warm amber, spice, soft wood","base":"Deep amber, musk, benzoin"}]},{"name":"Nahum","testament":"OT","chapter":34,"lineName":"The Storm Collection","subtitle":"The Lord is slow to anger but great in power.","fragrances":[{"numeral":"I","name":"Whirlwind","desc":"His path is in the whirlwind and the storm — vast, terrifying, impersonal.","top":"Storm accord, ozone, cold cedar","heart":"Dark amber, wild herbs","base":"Stone, deep musk, cold base"},{"numeral":"II","name":"Nineveh Falls","desc":"Desolation and destruction at last — the end of cruelty.","top":"Ash, cold stone, bitter wood","heart":"Dark smoke, cold oud","base":"Ash, stone, dead musk"},{"numeral":"III","name":"Good News Feet","desc":"Beautiful on the mountains are the feet of one who brings good news.","top":"Mountain air, fresh cedar","heart":"Warm amber, clean herbs","base":"Warm musk, sandalwood"}]},{"name":"Habakkuk","testament":"OT","chapter":35,"lineName":"The Watchtower Accord","subtitle":"I will stand at my watch and station myself on the ramparts.","fragrances":[{"numeral":"I","name":"How Long, Lord","desc":"The complaint against heaven — raw, unfiltered, strangely faithful.","top":"Bitter citrus, cold herbs","heart":"Dark cedar, cold iris","base":"Stone, earth, cold musk"},{"numeral":"II","name":"Though the Fig Tree","desc":"Though nothing blooms, yet will I rejoice — joy with nothing to justify it.","top":"Green herbs, cold cedar","heart":"Dry amber, clean wood","base":"Stone, base musk, quiet amber"},{"numeral":"III","name":"Appointed Time","desc":"Write the vision, make it plain — the certainty of the not-yet.","top":"Clean air, fresh cedar","heart":"Soft amber, iris, warm wood","base":"Warm musk, sandalwood"}]},{"name":"Zephaniah","testament":"OT","chapter":36,"lineName":"The Remnant Line","subtitle":"He will rejoice over you with singing.","fragrances":[{"numeral":"I","name":"Day of the Lord","desc":"A day of wrath, darkness, and gloom — the weight before the joy.","top":"Cold ash, dark stone, bitter wood","heart":"Dark smoke, cold amber","base":"Ash, cold musk, stone"},{"numeral":"II","name":"Seek the Lord","desc":"Seek righteousness, seek humility — perhaps you will be sheltered.","top":"Clean cedar, quiet herbs","heart":"White iris, soft amber","base":"Soft musk, warm wood"},{"numeral":"III","name":"The Singing","desc":"He will rejoice over you with singing — God's own joy poured out as song.","top":"Light citrus, bright herbs","heart":"Warm amber, soft rose","base":"Cashmere musk, sandalwood, benzoin"}]},{"name":"Haggai","testament":"OT","chapter":37,"lineName":"The Haggai Collection","subtitle":"Consider carefully — is it a time for you to live in paneled houses?","fragrances":[{"numeral":"I","name":"Consider Your Ways","desc":"You plant much and harvest little — earning wages to put in a bag with holes.","top":"Dry grain, earth, wood","heart":"Cedar, dry amber, vetiver","base":"Earth, stone, base musk"},{"numeral":"II","name":"The Greater Glory","desc":"The glory of this latter house shall be greater — the future already shining.","top":"Golden amber, warm cedar","heart":"Labdanum, oud, warm spice","base":"Deep amber, musk, sandalwood"},{"numeral":"III","name":"From This Day","desc":"From this day on I will bless you — the moment the curse ends.","top":"Fresh herbs, clean cedar","heart":"Warm amber, soft iris","base":"Warm musk, sandalwood"}]},{"name":"Zechariah","testament":"OT","chapter":38,"lineName":"The Night Visions","subtitle":"Not by might, not by power, but by my Spirit.","fragrances":[{"numeral":"I","name":"Red Horses in the Night","desc":"The first vision — horses standing among myrtle trees in the night valley.","top":"Night air, myrtle, cold cedar","heart":"Dark amber, soft smoke, herbs","base":"Stone, cold musk, dark wood"},{"numeral":"II","name":"The Golden Lampstand","desc":"Two olive trees, seven lamps, an unending supply of oil.","top":"Warm olive, golden amber","heart":"Beeswax, amber, soft resins","base":"Warm musk, sandalwood"},{"numeral":"III","name":"Branches of Olive","desc":"The two anointed ones — the scent of consecrated authority.","top":"Olive branch, warm cedar","heart":"Amber, warm herbs, iris","base":"Warm musk, wood, golden amber"},{"numeral":"IV","name":"Behold Your King","desc":"Lowly and riding on a donkey — the scent of sovereign humility.","top":"Palm fronds, warm cedar","heart":"Myrrh, spikenard, amber","base":"Sandalwood, deep musk, warm resin"}]},{"name":"Malachi","testament":"OT","chapter":39,"lineName":"The Messenger's Fire","subtitle":"He will come like a refiner's fire and launder's soap.","fragrances":[{"numeral":"I","name":"Refiner's Fire","desc":"Fire that purifies rather than destroys — gold becoming gold.","top":"Hot amber, burning cedar","heart":"Incense, warm resins","base":"Gold amber, deep musk, smoke"},{"numeral":"II","name":"The Sun of Righteousness","desc":"Rising with healing in its wings — the dawn that ends all waiting.","top":"Bright citrus, warm amber","heart":"Golden amber, jasmine, warm cedar","base":"Sandalwood, golden musk, benzoin"},{"numeral":"III","name":"Return to Me","desc":"And I will return to you — the simplest, hardest, most gracious invitation.","top":"Clean cedar, warm herbs","heart":"Amber, soft rose, iris","base":"Warm musk, sandalwood"},{"numeral":"IV","name":"Elijah Before the Day","desc":"The messenger of the new covenant — the last fragrance before the long silence.","top":"Burning cedar, ozone","heart":"Smoke, incense, dark amber","base":"Deep resin, musk, ash"}]},{"name":"Matthew","testament":"NT","chapter":40,"lineName":"The Kingdom Collection","subtitle":"Blessed are the poor in spirit — theirs is the kingdom of heaven.","fragrances":[{"numeral":"I","name":"The Sermon Mount","desc":"Eight beatitudes in morning air — the manifesto of the new kingdom.","top":"Mountain air, fresh cedar, herbs","heart":"White flowers, iris, soft amber","base":"Clean musk, warm wood"},{"numeral":"II","name":"Our Father","desc":"The prayer that contains all prayers — simple, total, complete.","top":"Frankincense, cedar, clean herbs","heart":"Myrrh, warm amber, iris","base":"Sandalwood, musk, benzoin"},{"numeral":"III","name":"Wise Men's Gifts","desc":"Gold, frankincense, and myrrh — the three gifts that shaped the story.","top":"Warm golden amber, bergamot","heart":"Frankincense, myrrh, oud","base":"Deep amber, resin, warm musk"},{"numeral":"IV","name":"The Wedding Feast","desc":"The kingdom is like a wedding — joy, abundance, a table for everyone.","top":"Wine accord, warm spice, florals","heart":"Rose, amber, warm cedar","base":"Sandalwood, musk, golden amber"}]},{"name":"Mark","testament":"NT","chapter":41,"lineName":"The Servant Line","subtitle":"Immediately — and immediately — and immediately again.","fragrances":[{"numeral":"I","name":"Immediately","desc":"The word that defines Mark — action, urgency, no pause for meditation.","top":"Sharp citrus, cedar, clean air","heart":"Crisp herbs, clean amber","base":"Dry musk, wood, stone"},{"numeral":"II","name":"Sea of Galilee","desc":"Fishing nets, morning water, fish and fire on the shore.","top":"Salt water, morning air","heart":"Driftwood, sea grass","base":"Sea musk, soft wood, amber"},{"numeral":"III","name":"Healed","desc":"And immediately the fever left her — the word and the instant healing.","top":"Clean herbs, fresh cedar","heart":"Soft amber, white flowers","base":"Clean musk, warm base"}]},{"name":"Luke","testament":"NT","chapter":42,"lineName":"The Physician's Accord","subtitle":"For the Son of Man came to seek and save the lost.","fragrances":[{"numeral":"I","name":"The Stable","desc":"Straw and animal and the child — humble beyond all calculation.","top":"Hay, fresh cedar, animal warmth","heart":"Frankincense, myrrh, soft spice","base":"Warm amber, musk, earth"},{"numeral":"II","name":"The Good Samaritan","desc":"Oil and wine poured into wounds — the neighbour no one expected.","top":"Olive oil, wine accord, herbs","heart":"Warm amber, gentle cedar","base":"Warm musk, wood, gentle base"},{"numeral":"III","name":"Lost Coin Found","desc":"The woman sweeping until she finds it — the joy over one thing recovered.","top":"Warm home accord, soft herbs","heart":"Amber, soft florals","base":"Cashmere, musk, warm wood"},{"numeral":"IV","name":"The Prodigal Returns","desc":"While he was still far off, the father ran — the fragrance of homecoming grace.","top":"Road dust, citrus, warm cedar","heart":"Rose, warm amber, soft spice","base":"Sandalwood, musk, golden amber"}]},{"name":"John","testament":"NT","chapter":43,"lineName":"The Gospel of Light","subtitle":"In him was life, and that life was the light of all mankind.","fragrances":[{"numeral":"I","name":"In the Beginning","desc":"The Word was with God and the Word was God — before all fragrance, the source.","top":"Pure air, white cedar","heart":"Orris, white amber, iris","base":"Soft musk, sandalwood, clean base"},{"numeral":"II","name":"Living Water","desc":"The woman at the well — water that becomes a spring inside you.","top":"Clear water, cool herbs","heart":"Aquatic, soft cedar","base":"Clean musk, light amber"},{"numeral":"III","name":"Nard for Burial","desc":"She broke open the alabaster jar — extravagant love poured out.","top":"Spikenard, warm rose","heart":"Oud, amber, saffron","base":"Deep musk, resin, warm amber"},{"numeral":"IV","name":"The Resurrection Garden","desc":"She thought he was the gardener — morning dew, open tomb, impossible joy.","top":"Morning dew, garden air","heart":"White flowers, soft cedar, herbs","base":"Warm musk, sandalwood, light amber"},{"numeral":"V","name":"Bread of Life","desc":"I am the bread — the most intimate sustenance.","top":"Warm bread, golden grain","heart":"Honey, beeswax, warm amber","base":"Vanilla, musk, soft sandalwood"}]},{"name":"Acts","testament":"NT","chapter":44,"lineName":"The Pentecost Line","subtitle":"Suddenly a sound like a rushing mighty wind filled the whole house.","fragrances":[{"numeral":"I","name":"Wind and Fire","desc":"Fifty days after — the impossible arrival, tongues of flame, the birth of the church.","top":"Hot amber, ozone, burning cedar","heart":"Smoke, incense, wild herbs","base":"Deep amber, resin, ash"},{"numeral":"II","name":"Road to Damascus","desc":"Light above the brightness of the sun, and a voice — the collision that changed history.","top":"Bright citrus, hot stone","heart":"Clean cedar, warm amber","base":"Warm musk, sandalwood"},{"numeral":"III","name":"The Prison Song","desc":"Paul and Silas singing at midnight — joy in chains, the earthquake that follows.","top":"Cold stone, night air","heart":"Warm amber, incense, cedar","base":"Deep musk, resin, warm base"}]},{"name":"Romans","testament":"NT","chapter":45,"lineName":"The Roman Accord","subtitle":"The righteous shall live by faith.","fragrances":[{"numeral":"I","name":"Justified","desc":"Not by works but by faith — clean, received, breathtaking in its simplicity.","top":"Clean cedar, bright herbs","heart":"Soft amber, iris, white wood","base":"Clean musk, warm base"},{"numeral":"II","name":"No Condemnation","desc":"There is therefore now no condemnation — the lightest fragrance ever conceived.","top":"Fresh air, light citrus","heart":"White flowers, soft cedar","base":"Light musk, cashmere, soft amber"},{"numeral":"III","name":"All Things Work","desc":"For those who love God — the scent of trusting a promise in the dark.","top":"Soft amber, clean herbs","heart":"Warm cedar, iris","base":"Sandalwood, musk, warm base"},{"numeral":"IV","name":"Neither Death Nor Life","desc":"Nothing shall separate us — the most absolute fragrance of belonging.","top":"Warm amber, golden cedar","heart":"Rose, amber, warm incense","base":"Deep musk, sandalwood, benzoin"}]},{"name":"1 Corinthians","testament":"NT","chapter":46,"lineName":"The Corinthian Line","subtitle":"Love is patient, love is kind.","fragrances":[{"numeral":"I","name":"Love Patient","desc":"Suffereth long and is kind — patience as fragrance, gentleness embodied.","top":"Soft herbs, clean cedar","heart":"White rose, soft amber","base":"Cashmere, warm musk"},{"numeral":"II","name":"Love Kind","desc":"Love envieth not — open, generous, the scent of kindness in practice.","top":"Bright citrus, light florals","heart":"Warm amber, soft cedar","base":"Sandalwood, light musk"},{"numeral":"III","name":"Tongues of Angels","desc":"Without love, the most beautiful speech is only noise — substance over performance.","top":"Clean air, soft cedar","heart":"Iris, white amber","base":"Soft musk, warm base"},{"numeral":"IV","name":"The Greatest","desc":"Now abides faith, hope, love — but the greatest is love.","top":"Golden amber, warm rose","heart":"Deep rose, warm cedar","base":"Sandalwood, golden musk, benzoin"}]},{"name":"2 Corinthians","testament":"NT","chapter":47,"lineName":"The Second Letter","subtitle":"My grace is sufficient for you — strength is made perfect in weakness.","fragrances":[{"numeral":"I","name":"Thorn in the Flesh","desc":"The grace that comes through, not around — strength made perfect in human weakness.","top":"Sharp herbs, cold cedar","heart":"Dry amber, cold iris","base":"Stone, earth musk"},{"numeral":"II","name":"Treasure in Jars","desc":"This treasure in clay jars — power contained in the ordinary.","top":"Warm amber, soft herbs","heart":"Cedar, warm resin","base":"Earth, warm musk, amber"},{"numeral":"III","name":"Godly Sorrow","desc":"Not the world's grief but godly sorrow that leads to life — clean, productive grief.","top":"Cold cedar, soft tears","heart":"Dark wood, cold iris","base":"Clean musk, amber"}]},{"name":"Galatians","testament":"NT","chapter":48,"lineName":"The Freedom Accord","subtitle":"For freedom Christ has set us free.","fragrances":[{"numeral":"I","name":"No Longer a Slave","desc":"Set free from the law's curse — the fragrance of chains removed.","top":"Fresh air, clean cedar, bergamot","heart":"Iris, soft amber, clean herbs","base":"Light musk, sandalwood"},{"numeral":"II","name":"Fruit of the Spirit","desc":"Love, joy, peace, patience, kindness — nine gifts as single fragrance.","top":"Love rose, joy citrus, peace herbs","heart":"Amber, soft wood, florals","base":"Warm musk, sandalwood, benzoin"},{"numeral":"III","name":"No Jew or Greek","desc":"All one in Christ — the scent of all walls removed.","top":"Clean cedar, bright herbs","heart":"Soft amber, iris, white flowers","base":"Clean musk, warm base"}]},{"name":"Ephesians","testament":"NT","chapter":49,"lineName":"The Heavenly Places","subtitle":"Seated with him in the heavenly realms.","fragrances":[{"numeral":"I","name":"Sealed with His Spirit","desc":"Marked, claimed, guaranteed — the fragrance of belonging.","top":"Wax seal accord, warm cedar","heart":"Amber, labdanum, warm resin","base":"Deep musk, benzoin, sandalwood"},{"numeral":"II","name":"Full Armor","desc":"Breastplate, shield, helmet, sword — the full armor is a fragrance of readiness.","top":"Leather, iron accord, cedar","heart":"Dark wood, vetiver, cold herbs","base":"Stone, deep musk, leather"},{"numeral":"III","name":"Wide, Long, High, Deep","desc":"The love that surpasses knowledge — dimensions no mind can hold.","top":"Vast air, cold cedar","heart":"Deep amber, warm rose","base":"Deep musk, sandalwood, incense"},{"numeral":"IV","name":"Walk Worthy","desc":"A worthy walk — dignified, purposeful, fragrant with calling.","top":"Clean cedar, bright herbs","heart":"Amber, iris, soft wood","base":"Warm musk, sandalwood"}]},{"name":"Philippians","testament":"NT","chapter":50,"lineName":"The Joy Collection","subtitle":"Rejoice in the Lord always — and again I say, rejoice.","fragrances":[{"numeral":"I","name":"From My Chains","desc":"Rejoicing from prison — the fragrance of joy that owes nothing to circumstances.","top":"Cold stone, bright citrus","heart":"Warm amber, soft cedar","base":"Clean musk, sandalwood"},{"numeral":"II","name":"Peace of God","desc":"That passes all understanding — the scent of the inexplicable calm.","top":"Soft herbs, clean cedar","heart":"White florals, iris, soft amber","base":"Cashmere, warm musk, sandalwood"},{"numeral":"III","name":"Whatever Is True","desc":"Think on these things — beauty concentrated to a litany.","top":"Clean air, bright citrus","heart":"White flowers, iris, soft cedar","base":"Clean musk, warm base"},{"numeral":"IV","name":"I Have Learned","desc":"Content in all states — the deepest, most earned fragrance.","top":"Warm cedar, quiet herbs","heart":"Amber, soft wood, iris","base":"Sandalwood, warm musk"}]},{"name":"Colossians","testament":"NT","chapter":51,"lineName":"The Hidden Mystery","subtitle":"Christ in you — the hope of glory.","fragrances":[{"numeral":"I","name":"Firstborn of All Creation","desc":"In him all things hold together — the scent of cosmic coherence.","top":"Pure cedar, cold air","heart":"Deep amber, incense","base":"Sandalwood, deep musk, resin"},{"numeral":"II","name":"Hidden in Christ","desc":"Your life is hidden with Christ in God — the most intimate concealment.","top":"Soft amber, quiet herbs","heart":"Warm cedar, iris","base":"Cashmere, musk, sandalwood"},{"numeral":"III","name":"Whatever You Do","desc":"Do it as for the Lord — the transforming of ordinary work into sacrament.","top":"Clean cedar, fresh air","heart":"Warm amber, soft florals","base":"Sandalwood, warm musk"}]},{"name":"1 Thessalonians","testament":"NT","chapter":52,"lineName":"The Thessalonian Line","subtitle":"Pray without ceasing — in everything give thanks.","fragrances":[{"numeral":"I","name":"Work of Faith","desc":"The labor of love and patience of hope — three virtues as one fragrance.","top":"Clean herbs, warm cedar","heart":"Amber, soft rose, iris","base":"Sandalwood, warm musk"},{"numeral":"II","name":"Pray Without Ceasing","desc":"The impossible continuous prayer — incense that never stops rising.","top":"Frankincense, soft cedar","heart":"Myrrh, labdanum, warm amber","base":"Deep resin, musk, benzoin"},{"numeral":"III","name":"Caught Up Together","desc":"The blessed hope — the fragrance of the day all things are made new.","top":"Fresh air, bright citrus, ozone","heart":"White flowers, soft cedar","base":"Clean musk, warm amber"}]},{"name":"2 Thessalonians","testament":"NT","chapter":53,"lineName":"The Standing Firm","subtitle":"Stand firm and hold fast to the teachings passed on to you.","fragrances":[{"numeral":"I","name":"Steadfast","desc":"Not shaken, not alarmed — the fragrance of settled certainty.","top":"Cold cedar, clean stone","heart":"Dry amber, iris, cold herbs","base":"Stone, deep musk, cold wood"},{"numeral":"II","name":"Grace in All Things","desc":"The grace of our Lord Jesus Christ be with you all — the final benediction.","top":"Warm amber, soft cedar","heart":"Soft rose, iris, warm herbs","base":"Sandalwood, musk, benzoin"}]},{"name":"1 Timothy","testament":"NT","chapter":54,"lineName":"The First Letter","subtitle":"Godliness with contentment is great gain.","fragrances":[{"numeral":"I","name":"Godliness","desc":"The training of the soul — dedicated, consistent, quietly powerful.","top":"Clean cedar, cool herbs","heart":"Iris, soft amber, white wood","base":"Sandalwood, clean musk"},{"numeral":"II","name":"Contentment","desc":"Having food and clothing, be content — the radical sufficiency of enough.","top":"Warm bread, soft herbs","heart":"Warm amber, soft cedar","base":"Cashmere, warm musk, benzoin"},{"numeral":"III","name":"Fight the Good Fight","desc":"Hold onto faith with a good conscience — the scent of the noble struggle.","top":"Leather, cedar, cold herbs","heart":"Dark amber, vetiver","base":"Deep musk, stone, wood"}]},{"name":"2 Timothy","testament":"NT","chapter":55,"lineName":"The Last Letter","subtitle":"I have fought the good fight, I have finished the race.","fragrances":[{"numeral":"I","name":"Fan the Flame","desc":"Stir up the gift — the ember that becomes fire.","top":"Warm cedar, hot amber","heart":"Burning incense, dark wood","base":"Deep amber, smoke, resin"},{"numeral":"II","name":"All Scripture","desc":"God-breathed and useful — the fragrance of living text.","top":"Old paper, cedar, dry herbs","heart":"Warm amber, iris","base":"Sandalwood, warm musk"},{"numeral":"III","name":"I Have Finished","desc":"The final benediction — the most earned fragrance a human can wear.","top":"Warm cedar, quiet amber","heart":"Soft rose, iris","base":"Sandalwood, warm musk, benzoin"}]},{"name":"Titus","testament":"NT","chapter":56,"lineName":"The Titus Accord","subtitle":"He saved us not because of righteous things we had done.","fragrances":[{"numeral":"I","name":"Renewing of the Spirit","desc":"Washing and renewal through the Spirit — clean, remade, vivid.","top":"Fresh water, clean cedar","heart":"Iris, soft amber, white flowers","base":"Clean musk, soft sandalwood"},{"numeral":"II","name":"Grace Teaches Us","desc":"Grace is the teacher — the scent of learning a better way.","top":"Warm cedar, soft herbs","heart":"Amber, iris, soft rose","base":"Cashmere, warm musk"}]},{"name":"Philemon","testament":"NT","chapter":57,"lineName":"The Philemon Line","subtitle":"Receive him no longer as a slave, but as a dear brother.","fragrances":[{"numeral":"I","name":"Charge It to Me","desc":"Paul assuming Onesimus's debt — the scent of substitutionary grace.","top":"Warm amber, cedar, spice","heart":"Soft oud, amber rose","base":"Sandalwood, deep musk"},{"numeral":"II","name":"Brother","desc":"No longer slave — the transformation of one word.","top":"Clean cedar, warm herbs","heart":"Soft amber, iris","base":"Warm musk, sandalwood"},{"numeral":"III","name":"Refresh My Heart","desc":"Refresh my heart in Christ — the simplest and deepest request.","top":"Cool air, cedar, citrus","heart":"Soft amber, white florals","base":"Cashmere, clean musk"}]},{"name":"Hebrews","testament":"NT","chapter":58,"lineName":"The Faith Collection","subtitle":"Faith is the substance of things hoped for.","fragrances":[{"numeral":"I","name":"The Cloud of Witnesses","desc":"Surrounded by so great a cloud — the faith of every ancestor.","top":"Cold mountain air, cedar","heart":"Deep amber, incense, iris","base":"Stone, deep musk, sandalwood"},{"numeral":"II","name":"The Throne of Grace","desc":"Come boldly — the invitation to the most sacred place.","top":"Frankincense, warm cedar","heart":"Myrrh, amber, sacred wood","base":"Deep amber, resin, musk"},{"numeral":"III","name":"By Faith","desc":"Abel, Enoch, Noah, Abraham — the litany of faith.","top":"Ancient cedar, dry herbs","heart":"Warm amber, labdanum","base":"Deep musk, sandalwood, benzoin"},{"numeral":"IV","name":"The Better Country","desc":"Seeking a city whose builder is God — the pilgrim's sustaining vision.","top":"Mountain air, fresh cedar","heart":"Golden amber, warm iris","base":"Sandalwood, warm musk, benzoin"}]},{"name":"James","testament":"NT","chapter":59,"lineName":"The Practical Line","subtitle":"Faith without works is dead.","fragrances":[{"numeral":"I","name":"Consider It Pure Joy","desc":"The testing of faith producing perseverance — strange joy in difficulty.","top":"Sharp citrus, cold cedar","heart":"Dry amber, iris, cold herbs","base":"Stone, dry musk"},{"numeral":"II","name":"Ask in Faith","desc":"Ask and it shall be given — but without doubting.","top":"Clean air, warm cedar","heart":"Soft amber, white flowers","base":"Clean musk, warm base"},{"numeral":"III","name":"Tame the Tongue","desc":"A small fire sets a great forest ablaze — the weight of words.","top":"Hot amber, cedar, fire accord","heart":"Smoke, dark cedar","base":"Ash, deep musk"},{"numeral":"IV","name":"The Prayer of Faith","desc":"The effectual fervent prayer of a righteous man availeth much.","top":"Frankincense, cedar","heart":"Myrrh, amber, warm herbs","base":"Resin, musk, benzoin"}]},{"name":"1 Peter","testament":"NT","chapter":60,"lineName":"The Living Stone","subtitle":"You are a chosen people, a royal priesthood, a holy nation.","fragrances":[{"numeral":"I","name":"Living Stone","desc":"Rejected by men but chosen by God — the building block the builders missed.","top":"Cool stone, cedar, clean air","heart":"Warm amber, iris, dry herbs","base":"Stone, warm musk, sandalwood"},{"numeral":"II","name":"Fiery Trial","desc":"Do not be surprised — suffering as refining rather than punishment.","top":"Hot amber, burning cedar","heart":"Scorched wood, incense","base":"Deep amber, ash, smoke"},{"numeral":"III","name":"Cast All Your Care","desc":"Casting every anxiety on him — the fragrance of released burden.","top":"Fresh air, light citrus","heart":"Soft cedar, white flowers","base":"Clean musk, soft amber"}]},{"name":"2 Peter","testament":"NT","chapter":61,"lineName":"The Morning Star","subtitle":"Until the day dawns and the morning star rises in your hearts.","fragrances":[{"numeral":"I","name":"The Transfiguration","desc":"We were eyewitnesses of his majesty — the scent of the mountain of God.","top":"Cold mountain air, white cedar","heart":"Pure amber, sacred wood","base":"Clean musk, deep amber"},{"numeral":"II","name":"Peter's Urgency","desc":"Written knowing his tent will soon be struck — the fragrance of a final gift.","top":"Warm cedar, soft amber","heart":"Iris, warm herbs, soft wood","base":"Sandalwood, musk, benzoin"},{"numeral":"III","name":"Morning Star Rising","desc":"In your hearts — dawn breaking inside you, the last fragrance before glory.","top":"Dawn air, bright citrus, cedar","heart":"White flowers, golden amber","base":"Warm musk, sandalwood"}]},{"name":"1 John","testament":"NT","chapter":62,"lineName":"The Abiding Collection","subtitle":"God is love — and whoever abides in love abides in God.","fragrances":[{"numeral":"I","name":"God Is Light","desc":"No darkness at all — the simplest, most total statement.","top":"Pure white cedar, clean air","heart":"White flowers, iris, soft amber","base":"Clean musk, soft sandalwood"},{"numeral":"II","name":"God Is Love","desc":"The four-word definition that changes everything.","top":"Warm rose, golden amber","heart":"Rose absolute, warm cedar","base":"Sandalwood, golden musk, benzoin"},{"numeral":"III","name":"Abide in Me","desc":"As the branch cannot bear fruit apart from the vine — the scent of union.","top":"Green vine, warm cedar","heart":"Amber, soft rose, herbs","base":"Warm musk, sandalwood"},{"numeral":"IV","name":"Perfect Love Casts Out Fear","desc":"The only force that removes the most human of responses.","top":"Warm amber, golden cedar","heart":"Rose, amber, soft spice","base":"Deep musk, sandalwood, warm resin"}]},{"name":"2 John","testament":"NT","chapter":63,"lineName":"The Elder's Line","subtitle":"Walk in love, as we have received commandment from the Father.","fragrances":[{"numeral":"I","name":"The Chosen Lady","desc":"To the elect lady and her children — intimate, familial, deeply personal.","top":"Warm cedar, soft herbs","heart":"Soft rose, amber, iris","base":"Cashmere, warm musk"},{"numeral":"II","name":"Walk in Truth","desc":"To walk in truth — the fragrance of a lived-out conviction.","top":"Clean cedar, cool herbs","heart":"Iris, soft amber, white flowers","base":"Clean musk, sandalwood"},{"numeral":"III","name":"Paper and Ink","desc":"I have much to say but not with paper and ink — the limits of words.","top":"Old paper, cedar, dry herbs","heart":"Warm amber, iris","base":"Sandalwood, gentle musk"}]},{"name":"3 John","testament":"NT","chapter":64,"lineName":"The Third Letter","subtitle":"The truth itself testifies about your faithfulness.","fragrances":[{"numeral":"I","name":"Gaius","desc":"Beloved Gaius, in whose soul John rejoiced — warmth, hospitality, the scent of welcome.","top":"Warm cedar, herbs, spice","heart":"Amber, soft rose, iris","base":"Sandalwood, warm musk"},{"numeral":"II","name":"Imitate Good","desc":"Imitate not evil but good — simple, total, the fragrance of good choices.","top":"Clean cedar, bright herbs","heart":"Soft amber, iris","base":"Clean musk, warm base"},{"numeral":"III","name":"Face to Face","desc":"I hope to see you soon — the longing for presence over letter.","top":"Warm amber, clean cedar","heart":"Soft rose, iris, warm herbs","base":"Cashmere, warm musk"}]},{"name":"Jude","testament":"NT","chapter":65,"lineName":"The Contender's Line","subtitle":"Contend earnestly for the faith once delivered to the saints.","fragrances":[{"numeral":"I","name":"Contend","desc":"Fight for the faith — leather, cedar, the scent of earned conviction.","top":"Leather, cedar, cold herbs","heart":"Dark amber, vetiver, cold wood","base":"Stone, deep musk, leather"},{"numeral":"II","name":"Kept from Falling","desc":"He who is able to keep you from falling — the most needed grace.","top":"Warm cedar, clean air","heart":"Soft amber, iris","base":"Sandalwood, warm musk"},{"numeral":"III","name":"Snatched from Fire","desc":"Save them by snatching them from the fire — urgent, hot, merciful.","top":"Hot amber, cedar, smoke","heart":"Dark wood, warm resin","base":"Deep amber, ash, musk"}]},{"name":"Revelation","testament":"NT","chapter":66,"lineName":"The Apocalypse Collection","subtitle":"Behold, I make all things new.","fragrances":[{"numeral":"I","name":"Seven Golden Lampstands","desc":"The vision of one like the Son of Man — eyes of fire, voice of many waters.","top":"Hot amber, ozone, cedar","heart":"Burning incense, dark wood","base":"Deep amber, smoke, gold accord"},{"numeral":"II","name":"The Lamb Upon the Throne","desc":"Worthy is the Lamb — the fragrance of ultimate deserved worship.","top":"Frankincense, saffron, warm cedar","heart":"Myrrh, oud, rose absolute","base":"Deep amber, musk, sacred resin"},{"numeral":"III","name":"Bowls of Golden Incense","desc":"The prayers of the saints rising before the throne — the most sacred smoke.","top":"Frankincense, myrrh, rare incense","heart":"Labdanum, oud, sacred wood","base":"Deep amber, resin, holy musk"},{"numeral":"IV","name":"The New Jerusalem","desc":"No sun, no moon, no temple — the glory of God is the light.","top":"Pure white cedar, ozone, clean light","heart":"White amber, pure iris, rare flowers","base":"White musk, sandalwood, light amber"},{"numeral":"V","name":"Behold, I Come Quickly","desc":"The very last promise — the final fragrance of all human history.","top":"Fresh dawn, morning dew","heart":"White flowers, pure cedar, golden amber","base":"Warm musk, sandalwood, golden resin"}]}];
+
+let currentBookIndex = 0;
+
+// CURSOR
+const cursor = document.getElementById('custom-cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.transform = `translate(${e.clientX - 12}px, ${e.clientY - 12}px)`;
+});
+
+// PARTICLES
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let animFrame;
+
+function resizeCanvas(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+class Particle{
+  constructor(){
+    this.reset(true);
+  }
+  reset(initial){
+    this.x = Math.random() * canvas.width;
+    this.y = initial ? Math.random() * canvas.height : canvas.height + 10;
+    this.size = Math.random() * 2.5 + 0.5;
+    this.speedY = -(Math.random() * 0.6 + 0.2);
+    this.speedX = (Math.random() - 0.5) * 0.3;
+    this.opacity = Math.random() * 0.5 + 0.2;
+    this.wobble = Math.random() * Math.PI * 2;
+    this.wobbleSpeed = (Math.random() - 0.5) * 0.02;
+    const goldColors = ['rgba(201,168,76,', 'rgba(232,201,106,', 'rgba(181,101,29,', 'rgba(245,234,208,'];
+    this.color = goldColors[Math.floor(Math.random() * goldColors.length)];
+  }
+  update(){
+    this.y += this.speedY;
+    this.wobble += this.wobbleSpeed;
+    this.x += this.speedX + Math.sin(this.wobble) * 0.2;
+    if(this.y < -10) this.reset(false);
+    if(this.x < 0) this.x = canvas.width;
+    if(this.x > canvas.width) this.x = 0;
+  }
+  draw(){
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+    ctx.fillStyle = this.color + this.opacity + ')';
+    ctx.fill();
+    if(this.size > 1.5){
+      ctx.shadowBlur = 6;
+      ctx.shadowColor = this.color + '0.4)';
+    }
+    ctx.restore();
+  }
+}
+
+function initParticles(){
+  resizeCanvas();
+  particles = [];
+  for(let i=0;i<80;i++) particles.push(new Particle());
+  function loop(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{p.update();p.draw();});
+    animFrame = requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+window.addEventListener('resize', ()=>{
+  resizeCanvas();
+  particles.forEach(p=>{if(p.x>canvas.width)p.x=canvas.width;});
+});
+
+// SCREEN MANAGEMENT
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>{
+    s.classList.remove('active');
+    s.style.position='fixed';
+  });
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  el.style.position='relative';
+  el.scrollTop=0;
+  window.scrollTo(0,0);
+}
+
+// OPEN BIBLE
+function openBible(){
+  const inner = document.getElementById('bible-inner');
+  inner.style.transform = 'rotateY(-5deg)';
+  const cover = document.getElementById('bible-cover');
+  cover.style.transform = 'rotateY(-165deg)';
+  cover.style.transition = 'transform 0.8s cubic-bezier(0.4,0,0.2,1)';
+  setTimeout(()=>showTOC(), 900);
+}
+
+// SHOW TOC
+function showTOC(){
+  cancelAnimationFrame(animFrame);
+  showScreen('screen-toc');
+  const rows = document.querySelectorAll('.book-row');
+  rows.forEach((row,i)=>{
+    setTimeout(()=>{
+      row.classList.add('visible');
+    }, i * 18);
+  });
+}
+
+// SHOW BOOK
+function showBook(index){
+  currentBookIndex = index;
+  const book = booksData[index];
+  const isOT = book.testament === 'OT';
+  
+  const cardsHTML = book.fragrances.map(f => `
+    <div class="fragrance-card">
+      <div class="card-numeral">${f.numeral}</div>
+      <div class="card-name">${f.name}</div>
+      <div class="card-desc">${f.desc}</div>
+      <div class="card-notes">
+        <div><span class="note-label">Top</span> — ${f.top}</div>
+        <div><span class="note-label">Heart</span> — ${f.heart}</div>
+        <div><span class="note-label">Base</span> — ${f.base}</div>
+      </div>
+      <div class="card-btn">Discover</div>
+    </div>
+  `).join('');
+
+  const prevBook = index > 0 ? booksData[index-1] : null;
+  const nextBook = index < booksData.length-1 ? booksData[index+1] : null;
+
+  document.getElementById('book-page-content').innerHTML = `
+    <div class="book-breadcrumb">
+      <span class="breadcrumb-link" onclick="showTOC()">The Scripture Collection</span>
+      <span class="breadcrumb-sep">›</span>
+      <span>${book.name}</span>
+    </div>
+    <div class="book-hero">
+      <div class="book-testament-label">${isOT ? 'Old Testament' : 'New Testament'}</div>
+      <div class="book-chapter-num">Book ${book.chapter} of 66</div>
+      <div class="book-title">${book.name}</div>
+      <div class="book-subtitle-hero">${book.subtitle}</div>
+      <div class="book-line-name">${book.lineName}</div>
+    </div>
+    <div class="fragrances-grid">${cardsHTML}</div>
+    <div class="book-nav">
+      <div class="nav-btn ${!prevBook?'disabled':''}" onclick="${prevBook?'showBook('+(index-1)+')':\'\''}">
+        <span class="nav-arrow">&#8592;</span>
+        <div>
+          <div>${prevBook?prevBook.name:''}</div>
+        </div>
+      </div>
+      <div class="nav-center">
+        ${index+1} / ${booksData.length}
+      </div>
+      <div class="nav-btn ${!nextBook?'disabled':''}" onclick="${nextBook?'showBook('+(index+1)+')':\'\''}">
+        <div>
+          <div>${nextBook?nextBook.name:''}</div>
+        </div>
+        <span class="nav-arrow">&#8594;</span>
+      </div>
+    </div>
+  `;
+
+  showScreen('screen-book');
+}
+
+// KEYBOARD NAV on TOC
+document.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && document.activeElement.classList.contains('book-row')){
+    document.activeElement.click();
+  }
+});
+
+// INIT
+initParticles();
+
+// Reset bible state when returning to landing (if ever needed)
+function showLanding(){
+  const cover = document.getElementById('bible-cover');
+  cover.style.transform = '';
+  const inner = document.getElementById('bible-inner');
+  inner.style.transform = '';
+  initParticles();
+  showScreen('screen-landing');
+}
+</script>
+</body>
+</html>
