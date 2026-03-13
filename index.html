@@ -359,16 +359,24 @@ body{
     rgba(201,168,76,0.06) 4px
   );
 }
-.open-prompt{
-  font-family:'Cormorant Garamond',serif;
-  font-style:italic;
-  font-size:0.85rem;
-  color:rgba(201,168,76,0.5);
-  letter-spacing:0.2em;
+.open-btn{
+  margin-top:1.5rem;
+  padding:0.75rem 2.5rem;
+  background:transparent;
+  border:1px solid rgba(201,168,76,0.6);
+  color:var(--gold);
+  font-family:'Cinzel',serif;
+  font-size:0.8rem;
+  letter-spacing:0.25em;
+  cursor:pointer;
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
   animation:fadeInUp 1s ease 1.4s both;
-  transition:color 0.3s;
 }
-.bible-scene:hover .open-prompt{color:rgba(201,168,76,0.8);}
+.open-btn:hover{
+  background:rgba(201,168,76,0.12);
+  border-color:var(--gold);
+  color:var(--gold-light);
+}
 
 /* ==================== TOC SCREEN ==================== */
 #screen-toc{
@@ -734,7 +742,7 @@ body{
         <div class="bible-page-edges"></div>
       </div>
     </div>
-    <div class="open-prompt">— Open to begin —</div>
+    <button class="open-btn" onclick="openBible()">Open the Scripture</button>
   </div>
 </div>
 
