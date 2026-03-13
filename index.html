@@ -983,7 +983,7 @@ function showBook(index){
     </div>
     <div class="fragrances-grid">${cardsHTML}</div>
     <div class="book-nav">
-      <div class="nav-btn ${!prevBook?'disabled':''}" onclick="${prevBook?'showBook('+(index-1)+')':\'\''}">
+      <div class="nav-btn ${!prevBook?'disabled':''}" onclick="${prevBook?'showBook('+(index-1)+')':''}">
         <span class="nav-arrow">&#8592;</span>
         <div>
           <div>${prevBook?prevBook.name:''}</div>
@@ -992,7 +992,7 @@ function showBook(index){
       <div class="nav-center">
         ${index+1} / ${booksData.length}
       </div>
-      <div class="nav-btn ${!nextBook?'disabled':''}" onclick="${nextBook?'showBook('+(index+1)+')':\'\''}">
+      <div class="nav-btn ${!nextBook?'disabled':''}" onclick="${nextBook?'showBook('+(index+1)+')':''}">
         <div>
           <div>${nextBook?nextBook.name:''}</div>
         </div>
