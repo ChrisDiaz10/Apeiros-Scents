@@ -74,7 +74,7 @@ body{
   align-items:center;
   justify-content:center;
   min-height:100vh;
-  overflow:hidden;
+  overflow:visible;
 }
 #particle-canvas{
   position:fixed;
@@ -131,6 +131,8 @@ body{
   flex-direction:row;
   align-items:stretch;
   position:relative;
+  perspective:1200px;
+  transform-style:preserve-3d;
 }
 /* SPINE */
 .bible-spine{
